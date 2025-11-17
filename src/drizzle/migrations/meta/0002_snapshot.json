@@ -1,6 +1,6 @@
 {
-  "id": "122192ab-6c5b-4fcd-9cb6-5f08a55f8d0f",
-  "prevId": "cbcca7f5-a7fb-427e-8986-3fb37d34e848",
+  "id": "63fd6b32-3f50-4661-86fc-7cf6f99f5751",
+  "prevId": "122192ab-6c5b-4fcd-9cb6-5f08a55f8d0f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -139,6 +139,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "seed": {
+          "name": "seed",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
         },
         "uploaded_at": {
           "name": "uploaded_at",
@@ -285,7 +291,7 @@
           "name": "seed",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "model_id": {
           "name": "model_id",

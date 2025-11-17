@@ -15,6 +15,13 @@
       "when": 1763388568986,
       "tag": "0001_same_catseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763392338988,
+      "tag": "0002_amused_onslaught",
+      "breakpoints": true
     }
   ]
 }

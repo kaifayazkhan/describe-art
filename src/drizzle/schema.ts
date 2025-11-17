@@ -84,7 +84,7 @@ export const request = pgTable('request', {
   height: integer('height').notNull(),
 
   steps: integer('steps').notNull(),
-  seed: bigint('seed', { mode: 'bigint' }).notNull(),
+  seed: bigint('seed', { mode: 'bigint' }),
 
   modelId: integer('model_id')
     .notNull()
@@ -102,6 +102,7 @@ export const image = pgTable('image', {
   storage_key: text('storage_key').notNull(),
   mimeType: varchar('mime_type').notNull(),
   order: integer('order').notNull(),
+  seed: bigint('seed', { mode: 'bigint' }),
 
   uploaded_at: timestamp('uploaded_at').defaultNow().notNull(),
 });
