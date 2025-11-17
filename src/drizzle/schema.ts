@@ -111,7 +111,7 @@ export const model = pgTable('model', {
   id: serial('id').primaryKey(),
 
   displayName: varchar('display_name').notNull(),
-  modelId: varchar('model_id').notNull(),
+  modelId: varchar('model_id').notNull().unique(),
 
   description: text('description'),
   version: varchar('version'),
