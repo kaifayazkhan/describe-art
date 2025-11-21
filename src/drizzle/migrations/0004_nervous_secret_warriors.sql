@@ -1,0 +1,1 @@
+ALTER TABLE "image" ADD CONSTRAINT "image_order_unique" UNIQUE("order");
