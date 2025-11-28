@@ -133,7 +133,12 @@ export const POST = async (req: NextRequest) => {
         success: true,
         message: 'Image generated successfully',
         data: finalResponse.map((item) => {
-          return `https://d16z51xdzcc5lg.cloudfront.net/${item.imageUrl}`;
+          return {
+            imageUrl: `https://d16z51xdzcc5lg.cloudfront.net/${item.imageUrl}`,
+            contentType: item.contentType,
+            order: item.order,
+            seed: item.seed,
+          };
         }),
       },
       { status: 201 },

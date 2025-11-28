@@ -1,5 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState } from 'react';
+import { ImageResponse } from '@/types/images';
 
 type ImageDescription = {
   prompt: string;
@@ -16,8 +17,8 @@ export const GenerateContext = createContext<{
   setImageDesc: React.Dispatch<React.SetStateAction<ImageDescription>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  images: object[];
-  setImages: React.Dispatch<React.SetStateAction<object[]>>;
+  images: ImageResponse[];
+  setImages: React.Dispatch<React.SetStateAction<ImageResponse[]>>;
 }>({
   imageDesc: initialValue,
   setImageDesc: () => {},
@@ -34,7 +35,7 @@ const GenerateContextProvider = ({
 }) => {
   const [imageDesc, setImageDesc] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<object[]>([]);
+  const [images, setImages] = useState<ImageResponse[]>([]);
 
   return (
     <GenerateContext.Provider
