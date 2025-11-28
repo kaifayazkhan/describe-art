@@ -35,9 +35,12 @@ export default function RHFSelect<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <div className='space-y-2'>
-          <div className={`${fieldState.error?.message ? 'text-red-500' : ''}`}>
+          <label
+            htmlFor={field.name}
+            className={`${fieldState.error?.message ? 'text-red-500' : ''}`}
+          >
             {label}
-          </div>
+          </label>
           <Select
             name={field.name}
             value={field.value}
@@ -49,7 +52,7 @@ export default function RHFSelect<T extends FieldValues>({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Aspect Ratio</SelectLabel>
-                {options?.map((item) => (
+                {options.map((item) => (
                   <SelectItem
                     key={`${item.value}-${item.label}`}
                     value={`${item.value}`}

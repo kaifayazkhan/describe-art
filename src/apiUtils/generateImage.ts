@@ -1,23 +1,26 @@
-import axios from 'axios';
+import { api } from '@/utils/axios';
+import { GenerateImageType } from '@/utils/server/generateImage';
 
-type Description = {
-  prompt: string;
-  imageCount: string;
-};
-
-export const generateImageAPI = async ({ prompt, imageCount }: Description) => {
+export const generateImageAPI = async ({
+  prompt,
+  imageCount,
+  aspectRatio,
+  modelId,
+}: GenerateImageType) => {
   const headers = {
     Accept: 'application/json',
   };
   const body = {
     prompt,
-    imageCount: parseInt(imageCount),
+    imageCount,
+    aspectRatio,
+    modelId,
   };
   try {
-    return await axios.post('/api/generate', body, {
+    return await api.post('/generate', body, {
       headers: headers,
     });
   } catch (e: any) {
-    throw new Error('Image not generated', e);
+    throw new Error(`Image not generated: ${e.message}`, { cause: e });
   }
 };

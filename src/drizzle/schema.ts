@@ -23,6 +23,8 @@ export const user = pgTable('user', {
     .notNull(),
 });
 
+export type UserType = typeof user.$inferSelect;
+
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),
@@ -93,16 +95,19 @@ export const request = pgTable('request', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export type RequestSelectType = typeof request.$inferSelect;
+export type RequestInsertType = typeof request.$inferInsert;
+
 export const image = pgTable('image', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  request_id: bigint('request_id', { mode: 'number' })
+  requestId: bigint('request_id', { mode: 'number' })
     .notNull()
     .references(() => request.id, { onDelete: 'cascade' }),
 
-  storage_key: text('storage_key').notNull(),
+  storageKey: text('storage_key').notNull(),
   mimeType: varchar('mime_type').notNull(),
   order: integer('order').notNull(),
-  seed: bigint('seed', { mode: 'bigint' }),
+  seed: bigint('seed', { mode: 'number' }),
 
   uploaded_at: timestamp('uploaded_at').defaultNow().notNull(),
 });
@@ -123,6 +128,9 @@ export const model = pgTable('model', {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export type ModelType = typeof model.$inferSelect;
+export type ModelInsertType = typeof model.$inferInsert;
 
 export const schema = {
   user,

@@ -21,8 +21,8 @@ export default function GeneratedImages() {
 
   return (
     <div className='flex-[3] h-full py-6 px-[7%] overflow-y-auto'>
-      {(images.length >= 1 || isLoading) && <p>{prompt}</p>}
-      {!isLoading && images.length <= 0 && (
+      {(images?.length >= 1 || isLoading) && <p>{prompt}</p>}
+      {!isLoading && images?.length <= 0 && (
         <>
           <p>Describe your art...</p>
           <div className='grid grid-cols-3 gap-10 mt-3'>

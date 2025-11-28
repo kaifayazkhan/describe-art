@@ -5,7 +5,7 @@ const nextConfig = {
         hostname: 'tecdn.b-cdn.net',
       },
       {
-        hostname: 'firebasestorage.googleapis.com',
+        hostname: 'd16z51xdzcc5lg.cloudfront.net',
       },
     ],
   },

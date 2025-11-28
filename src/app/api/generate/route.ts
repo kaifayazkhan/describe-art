@@ -1,91 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios, { AxiosResponse } from 'axios';
-import { uploadImageToStorage } from '@/helpers/saveImage';
-import { createRequest } from '@/helpers/createRequest';
-import { getDownloadURL } from 'firebase/storage';
-import { auth } from '@/utils/auth';
+import { and, eq } from 'drizzle-orm';
+import {
+  GenerateImageSchema,
+  generateWithStableDiffusion,
+} from '@/utils/server/generateImage';
+import { db } from '@/drizzle/db';
+import { model, request, image as requestImage } from '@/drizzle/schema';
+import { checkUserSession } from '@/utils/server/checkUserSession';
+import { uploadObject } from '@/utils/s3';
 
 export const POST = async (req: NextRequest) => {
-  const session = await auth.api.getSession({
-    headers: req.headers,
-  });
-
-  if (!session) {
-    return NextResponse.json(
-      {
-        message: 'Unauthorized - Token not present',
-        status: 404,
-      },
-      { status: 404 },
-    );
-  }
-
-  const userId = session.user.id;
   try {
-    if (!userId) {
-      console.error('User ID not present in token payload.');
+    const userId = await checkUserSession(req);
+
+    const requestBody = await req.json();
+
+    const { success, data, error } = GenerateImageSchema.safeParse(requestBody);
+
+    if (!success) {
       return NextResponse.json(
-        { message: 'Unauthorized - User ID Missing', status: 401 },
-        { status: 401 },
+        { success: false, message: 'Validation error', error: error?.issues },
+        { status: 400 },
       );
     }
-    const { prompt, imageCount } = await req.json();
-    const path =
-      'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
 
-    const headers = {
-      Accept: 'application/json',
-      Authorization: `Bearer ${process.env.STABILITY_API_KEY}`,
-    };
-    const body = {
-      steps: 35,
-      width: 1024,
-      height: 1024,
-      seed: 0,
-      cfg_scale: 7,
-      samples: imageCount,
-      text_prompts: [
-        {
-          text: `${prompt} (extremely detailed 8k photograph),(masterpiece), (best quality), (ultra-detailed), (best shadow), sony A7, 35mm`,
-          weight: 1,
-        },
-        {
-          text: 'blurry, bad, lowresolution, bad anatomy, bad hands, mutated hand, text, error, missing fingers, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, out of focus, (wedding ring:1.1), 2girls, 3girls, (((multiple views))), (((bad proportions))), (((multiple legs))), (((multiple arms))), (monotone). 3D. low quality lowres multiple breasts, bad fingers, ((gaping anus)), ((gaping pussy)), jewelry, ((vertical letterboxing)), ((letterboxing)), dark skin',
-          weight: -1,
-        },
-      ],
-    };
-    const response = (await axios.post(path, body, {
-      headers: headers,
-    })) as AxiosResponse;
+    // Verify model
+    const [imageModel] = await db
+      .select({ id: model.id, model: model.modelId })
+      .from(model)
+      .where(and(eq(model.id, data?.modelId), eq(model.isActive, true)));
 
-    //This code converts the base64 to image and save in firebase storage and returns the url of image
-    const imageUrls = await Promise.all(
-      response.data.artifacts.map(async (image: any) => {
-        const uploadImage = await uploadImageToStorage({
-          imageData: image.base64,
-          imageName: image.seed,
+    if (!imageModel) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Validation error',
+        },
+        { status: 400 },
+      );
+    }
+
+    // Generate image
+    let response;
+    switch (imageModel.model) {
+      case 'stable-diffusion-xl-1024-v1-0':
+        response = await generateWithStableDiffusion({
+          prompt: data?.prompt,
+          imageCount: data?.imageCount,
+          aspectRatio: data?.aspectRatio,
         });
+        break;
+      case 'black-forest-labs/flux-schnell':
+        break;
+      case 'black-forest-labs/flux-dev':
+        break;
+      default:
+        throw new Error('No image model found');
+        break;
+    }
 
-        if (uploadImage) {
-          return await getDownloadURL(uploadImage.ref);
-        }
+    if (!response) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Failed to generate Image',
+          data: response,
+        },
+        { status: 500 },
+      );
+    }
+
+    // Add request inside request table
+    const [requestResponse] = await db
+      .insert(request)
+      .values({
+        prompt: data?.prompt ?? '',
+        imageCount: data?.imageCount,
+        height: response.height,
+        width: response.width,
+        userId: userId.toString(),
+        modelId: imageModel.id,
+        steps: 35,
+      })
+      .returning({ requestId: request.id });
+
+    if (!requestResponse || !requestResponse.requestId) {
+      throw new Error('Failed to insert request in db');
+    }
+
+    // Upload all images to s3
+    const uploadResults = await Promise.allSettled(
+      response.images.map(async (image, index) => {
+        const type = 'image/png';
+        const imageBuffer = Buffer.from(image.base64, 'base64');
+
+        const uploadKey = `${Date.now()}-${image.seed}.${response.format}`;
+        await uploadObject(uploadKey, `image/${response.format}`, imageBuffer);
+
+        return { key: uploadKey, seed: image.seed, order: index };
       }),
     );
-    //Returns the response with image urls
-    if (imageUrls.length > 0) {
-      await createRequest({ prompt, imageCount, response: imageUrls });
-      return NextResponse.json(
-        { message: 'Image generated successfully', data: imageUrls },
-        { status: 201 },
-      );
-    } else {
-      return NextResponse.json({ message: 'No images found' }, { status: 400 });
-    }
-  } catch (error) {
-    console.error(error);
+
+    // Insert all image metadata inside image table
+    const insertValues = uploadResults
+      .filter((item) => item.status === 'fulfilled')
+      .map((item, index) => {
+        return {
+          requestId: requestResponse.requestId,
+          storageKey: item.value.key,
+          order: item.value.order,
+          mimeType: 'image/png',
+          seed: item.value.seed,
+        };
+      });
+
+    await db.insert(requestImage).values(insertValues).returning();
+
+    const finalResponse = await db
+      .select({
+        prompt: request.prompt,
+        imageUrl: requestImage.storageKey,
+        contentType: requestImage.mimeType,
+        order: requestImage.order,
+        seed: requestImage.seed,
+      })
+      .from(request)
+      .innerJoin(requestImage, eq(request.id, requestImage.requestId))
+      .where(eq(request.id, requestResponse.requestId));
+
     return NextResponse.json(
-      { message: 'Failed to create data', error },
+      {
+        success: true,
+        message: 'Image generated successfully',
+        data: finalResponse.map((item) => {
+          return `https://d16z51xdzcc5lg.cloudfront.net/${item.imageUrl}`;
+        }),
+      },
+      { status: 201 },
+    );
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? error : null,
+      },
       { status: 500 },
     );
   }
