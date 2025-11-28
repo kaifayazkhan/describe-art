@@ -1,11 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ContactInputs, ContactSchema } from '@/utils/FormSchema';
-import ErrorMessage from '@/components/UI/ErrorMessage';
 import InputBox from '@/components/UI/Input';
 import CTAButton from '@/components/UI/CTAButton';
 import SuccessModal from '@/components/UI/SuccessModal';
@@ -14,7 +12,6 @@ import sendMail from '@/apiUtils/sendMail';
 
 export default function ContactForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -42,33 +39,32 @@ export default function ContactForm() {
           title='Name *'
           type='text'
           placeholder='Enter your name'
+          error={errors.name?.message}
         />
-        {errors.name && <ErrorMessage errorMsg={errors.name.message} />}
         <InputBox
           register={register('email')}
           title='Email *'
           type='text'
           placeholder='Enter your email'
+          error={errors.email?.message}
         />
-        {errors.email && <ErrorMessage errorMsg={errors.email.message} />}
         <InputBox
           register={register('subject')}
           title='Subject *'
           type='text'
           placeholder='Subject'
+          error={errors.subject?.message}
         />
-        {errors.subject && <ErrorMessage errorMsg={errors.subject.message} />}
         <TextArea
           register={register('message')}
           title='Message *'
           placeholder='Enter your message'
+          error={errors.message?.message}
         />
-        {errors.message && <ErrorMessage errorMsg={errors.message.message} />}
         <div className='my-4'>
-          <CTAButton
-            title={isSubmitting ? 'Submitting...' : 'Submit'}
-            type='submit'
-          />
+          <CTAButton disabled={isSubmitting}>
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </CTAButton>
         </div>
       </form>
       {showSuccessModal && (

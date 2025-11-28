@@ -1,17 +1,17 @@
-'use client';
 import React from 'react';
 import GenerateSidebar from './_components/Sidebar';
-import GeneratedImages from './_components/GeneratedImages';
+import OutputImages from './_components/OutputImages';
 import GenerateContextProvider from '@/context/Generate';
-import Header from '@/components/Header';
+import { getModels } from '@/apiUtils/models';
 
-export default function Generate() {
+export default async function Generate() {
+  const models = await getModels();
+
   return (
     <GenerateContextProvider>
-      <Header padding='px-3' />
       <div className='flex-Col h-full md:flex-Row md:heightScreen'>
-        <GenerateSidebar />
-        <GeneratedImages />
+        <GenerateSidebar models={models ?? []} />
+        <OutputImages />
       </div>
     </GenerateContextProvider>
   );

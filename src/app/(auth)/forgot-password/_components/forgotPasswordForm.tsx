@@ -2,22 +2,21 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { AxiosResponse } from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import {
   ForgotPasswordEmailInput,
   forgotPasswordEmailSchema,
 } from '@/utils/FormSchema';
-import ErrorMessage from '../../../../components/UI/ErrorMessage';
-import { forgotPassword } from '@/apiUtils/auth';
 import InputBox from '@/components/UI/Input';
 import CTAButton from '@/components/UI/CTAButton';
 import SuccessModal from '../../../../components/UI/SuccessModal';
+import { authClient } from '@/utils/auth-client';
 
 export default function ForgotPasswordForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordEmailInput>({
@@ -26,11 +25,28 @@ export default function ForgotPasswordForm() {
 
   const onSubmit: SubmitHandler<ForgotPasswordEmailInput> = async (data) => {
     try {
-      const res = (await forgotPassword(data)) as AxiosResponse<any>;
-      if (res.status === 200) {
+      // const res = (await forgotPassword(data)) as AxiosResponse<any>;
+      // if (res.status === 200) {
+      //   setShowSuccessModal(true);
+      // } else {
+      //   toast.error('User does not exist with this email');
+      // }
+
+      const res = await authClient.requestPasswordReset(
+        {
+          email: data.email,
+          redirectTo: '/reset-password',
+        },
+        {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        },
+      );
+
+      if (res.data) {
         setShowSuccessModal(true);
-      } else {
-        toast.error('User does not exist with this email');
+        reset();
       }
     } catch (error) {
       console.error(error);
@@ -45,13 +61,12 @@ export default function ForgotPasswordForm() {
           title='Email'
           type='text'
           placeholder='Enter your email'
+          error={errors.email?.message}
         />
-        {errors.email && <ErrorMessage errorMsg={errors.email.message} />}
         <div className='my-4'>
-          <CTAButton
-            title={isSubmitting ? 'Loading...' : 'Submit'}
-            type='submit'
-          />
+          <CTAButton disabled={isSubmitting}>
+            {isSubmitting ? 'Loading...' : 'Submit'}
+          </CTAButton>
         </div>
       </form>
       {showSuccessModal && (

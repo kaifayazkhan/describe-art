@@ -1,52 +1,44 @@
 'use client';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import CTAButton from '../UI/CTAButton';
 import { headerData } from '@/constants/data';
 import Hamburger from './Hamburger';
-import { headers } from './types';
-import axios from 'axios';
 import { cn } from '@/utils/tailwind-merge';
+import { authClient } from '@/utils/auth-client';
+import { Session } from '@/utils/auth';
+import { useEffect, useState } from 'react';
 
 export default function Header({ padding }: { padding?: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [accessToken, setAccessToken] = useState(false);
-
-  const handleLogin = () => {
-    router.push('/signIn');
-  };
-
-  const getMe = async () => {
-    try {
-      const res = await axios.get('/api/user/get-me');
-      if (res.data && res.status === 200) {
-        setAccessToken(true);
-      } else {
-        setAccessToken(false);
-        // router.push("/")
-      }
-    } catch (e) {
-      // router.push("/")
-    }
-  };
-
-  useEffect(() => {
-    getMe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [session, setSession] = useState<Session | null>(null);
 
   const handleLogout = async () => {
     try {
-      await axios.get('/api/user/logout');
-      getMe();
-      router.push('/');
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            setSession(null);
+            router.push('/signIn');
+          },
+        },
+      });
     } catch (error: any) {
       throw new Error('Logout failed', error.message);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      const res = await authClient.getSession();
+      if (!res.data) {
+        return;
+      }
+      setSession(res.data);
+    })();
+  }, []);
 
   return (
     <header
@@ -63,7 +55,7 @@ export default function Header({ padding }: { padding?: string }) {
         </Link>
         <nav className='hidden md:flex items-center gap-8'>
           <ul className='flex items-center gap-8 '>
-            {headerData?.map(({ id, title, link }: headers) => (
+            {headerData?.map(({ id, title, link }) => (
               <li
                 key={id}
                 className={`hover:text-primaryCTA ${
@@ -74,18 +66,14 @@ export default function Header({ padding }: { padding?: string }) {
               </li>
             ))}
             <li>
-              {accessToken ? (
-                <CTAButton
-                  title='Logout'
-                  onClick={handleLogout}
-                  className='rounded-3xl px-5'
-                />
+              {session ? (
+                <CTAButton onClick={handleLogout} className='rounded-3xl px-5'>
+                  Logout
+                </CTAButton>
               ) : (
-                <CTAButton
-                  title='Login'
-                  onClick={handleLogin}
-                  className='rounded-3xl px-5'
-                />
+                <CTAButton className='rounded-3xl px-5' asChild>
+                  <Link href={'/signIn'}>Login</Link>
+                </CTAButton>
               )}
             </li>
           </ul>
@@ -93,18 +81,14 @@ export default function Header({ padding }: { padding?: string }) {
 
         <div className='flex md:hidden flex-center gap-3'>
           <div className='md:hidden'>
-            {accessToken ? (
-              <CTAButton
-                title='Logout'
-                onClick={handleLogout}
-                className='rounded-3xl px-5'
-              />
+            {session ? (
+              <CTAButton onClick={handleLogout} className='rounded-3xl px-5'>
+                Logout
+              </CTAButton>
             ) : (
-              <CTAButton
-                title='Login'
-                onClick={handleLogin}
-                className='rounded-3xl px-5'
-              />
+              <CTAButton className='rounded-3xl px-5' asChild>
+                <Link href={'/signIn'}>Login</Link>
+              </CTAButton>
             )}
           </div>
           <Hamburger />

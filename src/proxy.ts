@@ -1,35 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
 
-export function proxy(request: NextRequest) {
+const publicPath = [
+  '/signIn',
+  '/signUp',
+  '/forgot-password',
+  '/reset-password',
+];
+
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  const isPublicPath =
-    path === '/signIn' ||
-    path === '/signUp' ||
-    path === '/forgot-password' ||
-    path === '/contact';
+  const sessionCookie = getSessionCookie(request);
 
-  const isGeneratePath = path === '/generate';
-  const token = request.cookies.get('token')?.value || '';
+  const isPublicPath = publicPath.includes(path);
 
-  if (isGeneratePath && !token) {
-    return NextResponse.redirect(new URL('/signIn', request.nextUrl));
+  const isPrivatePath = path === '/generate';
+
+  if (!sessionCookie && isPrivatePath) {
+    return NextResponse.redirect(new URL('/signIn', request.url));
   }
 
-  if (!isPublicPath && !token) {
-    return NextResponse.redirect(new URL('/signIn', request.nextUrl));
+  if (isPublicPath && sessionCookie) {
+    return NextResponse.redirect(new URL('/generate', request.nextUrl));
   }
+
+  return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
   matcher: [
-    '/',
     '/signIn',
     '/signUp',
     '/forgot-password',
+    '/reset-password',
     '/generate',
-    '/contact', // Corrected the path here
   ],
 };

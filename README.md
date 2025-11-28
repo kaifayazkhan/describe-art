@@ -12,17 +12,17 @@
 
 ## Project Description
 
-Text to Image generation platform that uses **Vision AI** to generate images from prompts. It uses **Stability API** and Stable Diffusion XL model for generating high quality images.
+Text to Image generation platform that uses **Vision AI** to generate images from prompts. It uses Stable Diffusion XL model for generating high quality images.
 
 ## Tech Stack
 
-Next.js, TailwindCSS, ContextAPI, TypeScript, Stable Diffusion, Firebase, Zod (for schema validation), React-hook-form
+Next.js, TailwindCSS, ContextAPI, TypeScript, Drizzle, PostgreSQL, AWS (S3 + Cloudfront), React-hook-form
 
 ## Features
 
-- Create account
+- Create account (Email and Password, Google Sign In)
 - Generate images from prompt
-- Images are stored in firebase storage
+- Images are stored in S3 bucket and metadata into postgres database
 
 ## Getting Started
 

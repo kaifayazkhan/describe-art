@@ -1,35 +1,42 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { AxiosResponse } from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { signUpSchema, SingUpInputs } from '@/utils/FormSchema';
-import ErrorMessage from '../../../../components/UI/ErrorMessage';
-import { signUp } from '@/apiUtils/auth';
 import InputBox from '@/components/UI/Input';
 import CTAButton from '@/components/UI/CTAButton';
-import SuccessModal from '../../../../components/UI/SuccessModal';
+import SuccessModal from '@/components/UI/SuccessModal';
 import { useState } from 'react';
+import { authClient } from '@/utils/auth-client';
 
 export default function SignUpForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const router = useRouter();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<SingUpInputs>({ resolver: zodResolver(signUpSchema) });
 
   const onSubmit: SubmitHandler<SingUpInputs> = async (data) => {
     try {
-      const res = (await signUp(data)) as AxiosResponse<any>;
-      if (res.status === 200) {
-        // toast.success("Email verification link is sent to your email")
-        // router.push("/signIn")
+      const res = await authClient.signUp.email(
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          callbackURL: '/generate',
+        },
+        {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        },
+      );
+
+      if (res.data) {
         setShowSuccessModal(true);
-      } else {
-        toast.error('Invalid email or password!');
+        reset();
       }
     } catch (error) {
       console.error(error);
@@ -44,36 +51,33 @@ export default function SignUpForm() {
           title='Name'
           type='text'
           placeholder='Enter your name'
+          error={errors.name?.message}
         />
-        {errors.name && <ErrorMessage errorMsg={errors.name.message} />}
         <InputBox
           register={register('email')}
           title='Email'
           type='text'
           placeholder='Enter your email'
+          error={errors.email?.message}
         />
-        {errors.email && <ErrorMessage errorMsg={errors.email.message} />}
         <InputBox
           register={register('password')}
           title='Password'
           type='password'
           placeholder='Enter your password'
+          error={errors.password?.message}
         />
-        {errors.password && <ErrorMessage errorMsg={errors.password.message} />}
         <InputBox
           register={register('confirmPassword')}
           title='Confirm Password'
           type='password'
           placeholder='Confirm your password'
+          error={errors.confirmPassword?.message}
         />
-        {errors.confirmPassword && (
-          <ErrorMessage errorMsg={errors.confirmPassword.message} />
-        )}
         <div className='my-4'>
-          <CTAButton
-            title={isSubmitting ? 'Creating your account...' : 'Create'}
-            type='submit'
-          />
+          <CTAButton disabled={isSubmitting}>
+            {isSubmitting ? 'Creating your account...' : 'Create'}
+          </CTAButton>
         </div>
       </form>
       {showSuccessModal && (

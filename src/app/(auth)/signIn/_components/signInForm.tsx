@@ -1,31 +1,47 @@
 'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { AxiosResponse } from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { signInSchema, SingInInputs } from '@/utils/FormSchema';
-import ErrorMessage from '../../../../components/UI/ErrorMessage';
-import { signIn } from '@/apiUtils/auth';
 import InputBox from '@/components/UI/Input';
 import CTAButton from '@/components/UI/CTAButton';
+import { authClient } from '@/utils/auth-client';
 
 export default function SignInForm() {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<SingInInputs>({ resolver: zodResolver(signInSchema) });
 
   const onSubmit: SubmitHandler<SingInInputs> = async (data) => {
     try {
-      const res = (await signIn(data)) as AxiosResponse<any>;
-      if (res.status === 200 && res.data.data.user) {
-        router.push('/generate');
-      } else {
-        toast.error('Invalid email or password!');
+      const res = await authClient.signIn.email(
+        {
+          email: data.email,
+          password: data.password,
+          callbackURL: '/generate',
+        },
+        {
+          onError: async (ctx) => {
+            if (ctx.error.code === 'EMAIL_NOT_VERIFIED') {
+              toast(
+                'Please verify your email. Email verification link is sent on your address.',
+              );
+              await authClient.sendVerificationEmail({
+                email: data.email,
+                callbackURL: '/generate',
+              });
+              return;
+            }
+            toast.error(ctx.error.message);
+          },
+        },
+      );
+      if (res.data) {
+        reset();
       }
     } catch (error) {
       console.error(error);
@@ -35,29 +51,28 @@ export default function SignInForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className=' flex-Col gap-3'>
       <InputBox
-        register={register('username')}
+        register={register('email')}
         title='Email'
         type='text'
         placeholder='Enter your email'
+        error={errors.email?.message}
       />
-      {errors.username && <ErrorMessage errorMsg={errors.username.message} />}
       <InputBox
         register={register('password')}
         title='Password'
         type='password'
         placeholder='Enter your password'
+        error={errors.password?.message}
       />
-      {errors.password && <ErrorMessage errorMsg={errors.password.message} />}
       <div className='text-right'>
         <Link href='/forgot-password' className='mt-4'>
           Forgot your Password?
         </Link>
       </div>
       <div className='my-4'>
-        <CTAButton
-          title={isSubmitting ? 'Loading...' : 'Login'}
-          type='submit'
-        />
+        <CTAButton disabled={isSubmitting}>
+          {isSubmitting ? 'Loading...' : 'Login'}
+        </CTAButton>
       </div>
     </form>
   );
