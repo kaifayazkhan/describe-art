@@ -54,8 +54,9 @@ export default function GenerateSidebar({ models }: { models: Models[] }) {
         aspectRatio: data.aspectRatio,
         modelId: data.model,
       });
+
       if (res?.data) {
-        const images = res.data.data;
+        const images = res.data;
         setImages(images);
       }
     } catch (e: any) {

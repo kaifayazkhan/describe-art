@@ -3,7 +3,7 @@ import z from 'zod';
 import { aspectRatio, getWidthAndHeight } from '@/utils/imageDimension';
 
 export const GenerateImageSchema = z.object({
-  prompt: z.string(),
+  prompt: z.string().max(400),
   imageCount: z.number(),
   aspectRatio: z.enum(aspectRatio),
   modelId: z.number(),

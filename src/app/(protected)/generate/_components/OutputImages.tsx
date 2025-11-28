@@ -1,11 +1,11 @@
 'use client';
 import React, { useState } from 'react';
-import { useGenerateImage } from '@/context/Generate';
 import Image from 'next/image';
-import PreviewImage from '../PreviewImage';
+import { useGenerateImage } from '@/context/Generate';
+import ImageOutputPreview from '@/app/(protected)/_components/ImagePreviewGallery';
 
 export default function GeneratedImages() {
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   const {
@@ -14,8 +14,8 @@ export default function GeneratedImages() {
     images,
   } = useGenerateImage();
 
-  const handlePreview = (url: string) => {
-    setPreviewUrl(url);
+  const handlePreview = (imageId: number) => {
+    setSelectedImage(imageId);
     setShowPreview(true);
   };
 
@@ -58,20 +58,27 @@ export default function GeneratedImages() {
               ))}
         </div>
       ) : (
-        <div className='grid grid-cols-3 mt-3 gap-10'>
-          {images?.map((image: any, index) => (
+        <div className='grid sm:grid-cols-2 lg:grid-cols-3 mt-3 gap-10'>
+          {images?.map((image, index) => (
             <div
               key={index}
-              className='flex-1 aspect-square max-w-full  flex-center  gradient-border relative hover:opacity-90 cursor-pointer'
-              onClick={() => handlePreview(image)}
+              className='flex-1 aspect-square max-w-full  flex-center gradient-border relative hover:opacity-70 cursor-pointer '
+              onClick={() => handlePreview(index)}
             >
-              <Image key={index} src={`${image}`} alt={`Image ${index}`} fill />
+              <Image
+                key={index}
+                src={image.imageUrl}
+                alt={`Image ${index}`}
+                className='object-contain'
+                fill
+              />
             </div>
           ))}
           {showPreview && (
-            <PreviewImage
-              src={previewUrl}
-              handleClose={() => setShowPreview(false)}
+            <ImageOutputPreview
+              selectedImageId={selectedImage ?? 0}
+              closeModal={() => setShowPreview(false)}
+              images={images}
             />
           )}
         </div>

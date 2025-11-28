@@ -48,7 +48,8 @@ export const GenerateImageSchema = z.object({
   prompt: z
     .string()
     .nonempty('Prompt is required')
-    .min(4, { message: 'Prompt length must be greater than 4 characters' }),
+    .min(4, { message: 'Prompt length must be greater than 4 characters' })
+    .max(400, { message: 'Length cannot be greater than 500' }),
   imageCount: z.coerce.number().int().min(1).max(5),
   aspectRatio: z.enum(aspectRatio),
   model: z.coerce
