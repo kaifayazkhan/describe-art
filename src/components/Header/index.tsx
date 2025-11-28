@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import CTAButton from '../UI/CTAButton';
 import { headerData } from '@/constants/data';
 import Hamburger from './Hamburger';
-import { headers } from './types';
 import { cn } from '@/utils/tailwind-merge';
 import { authClient } from '@/utils/auth-client';
 import { Session } from '@/utils/auth';
@@ -56,7 +55,7 @@ export default function Header({ padding }: { padding?: string }) {
         </Link>
         <nav className='hidden md:flex items-center gap-8'>
           <ul className='flex items-center gap-8 '>
-            {headerData?.map(({ id, title, link }: headers) => (
+            {headerData?.map(({ id, title, link }) => (
               <li
                 key={id}
                 className={`hover:text-primaryCTA ${

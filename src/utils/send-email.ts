@@ -39,7 +39,6 @@ export const sendEmail = async ({ email, subject, body }: EmailInput) => {
       throw new Error('Failed to send email');
     }
   } catch (error) {
-    console.log(error);
     throw new Error('Failed to send email', { cause: error });
   }
 };

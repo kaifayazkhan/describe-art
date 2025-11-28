@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { headerData } from '@/constants/data';
-import { headers } from './types';
 
 export default function MobileMenu({ isOpen }: { isOpen: Boolean }) {
   return (
@@ -10,7 +9,7 @@ export default function MobileMenu({ isOpen }: { isOpen: Boolean }) {
       }`}
     >
       <ul className='flex-Col justify-center text-black gap-1 py-2'>
-        {headerData?.map(({ id, title, link }: headers) => {
+        {headerData?.map(({ id, title, link }) => {
           return (
             <li key={id} className=' cursor-pointer '>
               <Link
