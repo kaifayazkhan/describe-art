@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 type ImageDescription = {
   prompt: string;
@@ -50,6 +50,10 @@ const GenerateContextProvider = ({
       {children}
     </GenerateContext.Provider>
   );
+};
+
+export const useGenerateImage = () => {
+  return useContext(GenerateContext);
 };
 
 export default GenerateContextProvider;

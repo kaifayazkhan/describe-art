@@ -9,7 +9,7 @@ export const headerData = [
     title: 'Contact us',
     link: '/contact',
   },
-];
+] as const;
 
 export const howToWritePromptsData = [
   {
@@ -36,7 +36,7 @@ export const howToWritePromptsData = [
       'A mixed media painting of a bird, volumetric outdoor lighting, midday, high fantasy, cgsociety, cheerful colors, full length, exquisite detail, post - processing, masterpiece',
     imageUri: '/assets/be-detailed.webp',
   },
-];
+] as const;
 
 export const faqsData = [
   {
@@ -70,4 +70,4 @@ export const faqsData = [
     description:
       "AI image generation uses powerful technology to create stunning conceptual photography through the use of pre-existing content found elsewhere on the internet. This means that copyright laws are sensitive around the subject, and regulations around the world are not up to date yet. Please follow our Terms and Conditions for AI Products that prohibit the use of AI-generated images that violate third-party IP rights. Such laws protect people's identity, creative ownership, and property from being exploited. If your AI-generated image is clear of such infringements, you can use them for personal and/or professional use.",
   },
-];
+] as const;

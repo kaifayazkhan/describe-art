@@ -1,4 +1,14 @@
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  bigserial,
+  integer,
+  varchar,
+  bigint,
+  serial,
+} from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -12,6 +22,8 @@ export const user = pgTable('user', {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export type UserType = typeof user.$inferSelect;
 
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
@@ -60,4 +72,72 @@ export const verification = pgTable('verification', {
     .notNull(),
 });
 
-export const schema = { user, session, verification, account };
+export const request = pgTable('request', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+
+  prompt: text('prompt').notNull(),
+  negativePrompt: text('negative_prompt'),
+
+  imageCount: integer('image_count').notNull(),
+  width: integer('width').notNull(),
+  height: integer('height').notNull(),
+
+  steps: integer('steps').notNull(),
+  seed: bigint('seed', { mode: 'bigint' }),
+
+  modelId: integer('model_id')
+    .notNull()
+    .references(() => model.id),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type RequestSelectType = typeof request.$inferSelect;
+export type RequestInsertType = typeof request.$inferInsert;
+
+export const image = pgTable('image', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  requestId: bigint('request_id', { mode: 'number' })
+    .notNull()
+    .references(() => request.id, { onDelete: 'cascade' }),
+
+  storageKey: text('storage_key').notNull(),
+  mimeType: varchar('mime_type').notNull(),
+  order: integer('order').notNull(),
+  seed: bigint('seed', { mode: 'number' }),
+
+  uploaded_at: timestamp('uploaded_at').defaultNow().notNull(),
+});
+
+export const model = pgTable('model', {
+  id: serial('id').primaryKey(),
+
+  displayName: varchar('display_name').notNull(),
+  modelId: varchar('model_id').notNull().unique(),
+
+  description: text('description'),
+  version: varchar('version'),
+  isActive: boolean('is_active').default(true),
+  provider: varchar('provider'),
+
+  createdAt: timestamp('created_at')
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export type ModelType = typeof model.$inferSelect;
+export type ModelInsertType = typeof model.$inferInsert;
+
+export const schema = {
+  user,
+  session,
+  verification,
+  account,
+  request,
+  image,
+  model,
+};

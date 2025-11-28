@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { authClient } from '@/utils/auth-client';
 import { cn } from '@/utils/tailwind-merge';
 
@@ -20,7 +21,8 @@ function SignInWithGoogle({
         callbackURL: '/generate',
       });
     } catch (error) {
-      throw error;
+      toast.error('Something went wrong!');
+      console.error('Sign-in error:', error);
     } finally {
       setIsLoading(false);
     }

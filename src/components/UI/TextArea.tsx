@@ -21,7 +21,7 @@ export default function TextArea({
       </label>
       <textarea
         placeholder={placeholder}
-        className={`outline-none border rounded-md p-4 bg-transparent ${error ? 'border-red-500' : 'border-primaryCTA'} `}
+        className={`outline-none hide-scrollbar border rounded-md p-4 bg-transparent focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-0 ${error ? 'border-red-500' : 'border-primaryCTA'} `}
         rows={4}
         {...register}
       />

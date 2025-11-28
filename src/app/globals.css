@@ -65,4 +65,8 @@
   .text-semi-medium {
     @apply text-xl md:text-2xl lg:text-3xl xl:text-4xl font-semibold leading-tight md:leading-tight lg:leading-tight xl:leading-tight;
   }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    @apply hidden appearance-none scroll-smooth;
+  }
 }

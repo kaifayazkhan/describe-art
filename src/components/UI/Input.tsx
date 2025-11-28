@@ -27,7 +27,7 @@ export default function InputBox({
         type={type}
         placeholder={placeholder}
         value={value}
-        className={`outline-none border rounded-md p-4 bg-transparent ${error ? 'border-red-500' : 'border-primaryCTA'} `}
+        className={`outline-none border rounded-md p-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-0 bg-transparent ${error ? 'border-red-500' : 'border-primaryCTA'} `}
         {...register}
       />
       {error && <span className='text-red-500'>{error}</span>}

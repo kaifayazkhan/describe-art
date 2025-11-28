@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { aspectRatio } from '@/utils/imageDimension';
 
 const passwordSchema = z.string().min(8, {
   message: 'Password must be greater than or equal to 8 characters',
@@ -43,25 +44,19 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
-export const GenerateSchema = z.object({
+export const GenerateImageSchema = z.object({
   prompt: z
     .string()
     .nonempty('Prompt is required')
     .min(4, { message: 'Prompt length must be greater than 4 characters' }),
-  imageCount: z
-    .string() // Change the type to string
-    .refine(
-      (value) => {
-        const numberValue = Number(value);
-        return !isNaN(numberValue) && numberValue >= 1 && numberValue <= 6;
-      },
-      {
-        message: 'Image count must be a number between 1 and 6',
-      },
-    ),
+  imageCount: z.coerce.number().int().min(1).max(5),
+  aspectRatio: z.enum(aspectRatio),
+  model: z.coerce
+    .number({ message: 'Select Model' })
+    .int({ message: 'Select Model' }),
 });
 
-export type GenerateInputs = z.infer<typeof GenerateSchema>;
+export type GenerateImageSchemaType = z.infer<typeof GenerateImageSchema>;
 
 export const ContactSchema = z.object({
   name: z
