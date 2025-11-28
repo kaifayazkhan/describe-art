@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useGenerateImage } from '@/hooks/generateImage';
+import { useGenerateImage } from '@/context/Generate';
 import Image from 'next/image';
 import PreviewImage from '../PreviewImage';
 
@@ -59,7 +59,7 @@ export default function GeneratedImages() {
         </div>
       ) : (
         <div className='grid grid-cols-3 mt-3 gap-10'>
-          {images.map((image: any, index) => (
+          {images?.map((image: any, index) => (
             <div
               key={index}
               className='flex-1 aspect-square max-w-full  flex-center  gradient-border relative hover:opacity-90 cursor-pointer'
