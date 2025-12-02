@@ -8,7 +8,9 @@ import {
   varchar,
   bigint,
   serial,
+  index,
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -72,45 +74,64 @@ export const verification = pgTable('verification', {
     .notNull(),
 });
 
-export const request = pgTable('request', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
+export const request = pgTable(
+  'request',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
 
-  prompt: text('prompt').notNull(),
-  negativePrompt: text('negative_prompt'),
+    prompt: text('prompt').notNull(),
+    negativePrompt: text('negative_prompt'),
 
-  imageCount: integer('image_count').notNull(),
-  width: integer('width').notNull(),
-  height: integer('height').notNull(),
+    imageCount: integer('image_count').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
 
-  steps: integer('steps').notNull(),
-  seed: bigint('seed', { mode: 'bigint' }),
+    steps: integer('steps').notNull(),
+    seed: bigint('seed', { mode: 'bigint' }),
 
-  modelId: integer('model_id')
-    .notNull()
-    .references(() => model.id),
+    modelId: integer('model_id')
+      .notNull()
+      .references(() => model.id),
 
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      userIdCreatedAtIndex: index('idx_request_user_created_at').on(
+        table.userId,
+        table.createdAt,
+      ),
+    };
+  },
+);
 
 export type RequestSelectType = typeof request.$inferSelect;
 export type RequestInsertType = typeof request.$inferInsert;
 
-export const image = pgTable('image', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  requestId: bigint('request_id', { mode: 'number' })
-    .notNull()
-    .references(() => request.id, { onDelete: 'cascade' }),
+export const image = pgTable(
+  'image',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    requestId: bigint('request_id', { mode: 'number' })
+      .notNull()
+      .references(() => request.id, { onDelete: 'cascade' }),
 
-  storageKey: text('storage_key').notNull(),
-  mimeType: varchar('mime_type').notNull(),
-  order: integer('order').notNull(),
-  seed: bigint('seed', { mode: 'number' }),
+    storageKey: text('storage_key').notNull(),
+    mimeType: varchar('mime_type').notNull(),
+    order: integer('order').notNull(),
+    seed: bigint('seed', { mode: 'number' }),
 
-  uploaded_at: timestamp('uploaded_at').defaultNow().notNull(),
-});
+    uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      requestIdIndex: index('idx_image_requestId').on(table.requestId),
+    };
+  },
+);
 
 export const model = pgTable('model', {
   id: serial('id').primaryKey(),
@@ -132,6 +153,17 @@ export const model = pgTable('model', {
 export type ModelType = typeof model.$inferSelect;
 export type ModelInsertType = typeof model.$inferInsert;
 
+export const requestRelations = relations(request, ({ many }) => ({
+  images: many(image),
+}));
+
+export const imageRelations = relations(image, ({ one }) => ({
+  request: one(request, {
+    fields: [image.requestId],
+    references: [request.id],
+  }),
+}));
+
 export const schema = {
   user,
   session,
@@ -140,4 +172,6 @@ export const schema = {
   request,
   image,
   model,
+  requestRelations,
+  imageRelations,
 };
