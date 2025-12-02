@@ -128,7 +128,7 @@ export const image = pgTable(
   },
   (table) => {
     return {
-      requestIdIndex: index('idx_image_requestId').on(table.requestId),
+      requestIdIndex: index('idx_image_request_id').on(table.requestId),
     };
   },
 );
