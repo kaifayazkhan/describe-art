@@ -12,7 +12,7 @@ function ImageGallery() {
   const [images, setImages] = useState<GalleryImages[]>([]);
   const [galleryImages, setGalleryImages] = useState<ImageResponseType[]>([]);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -37,7 +37,6 @@ function ImageGallery() {
     limit: number;
     cursor: string;
   }) => {
-    if (loading) return;
     try {
       setLoading(true);
       const response = await getImages({
@@ -140,7 +139,7 @@ function ImageGallery() {
         </div>
       ) : null}
 
-      {!loading && !hasNextPage && images.length > 0 ? (
+      {!loading && !hasNextPage && images.length >= 0 ? (
         <div className='w-full h-10 flex justify-center items-center'>
           No more images found
         </div>

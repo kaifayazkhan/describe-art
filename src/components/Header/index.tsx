@@ -19,10 +19,10 @@ export default function Header({ padding }: { padding?: string }) {
   const handleLogout = async () => {
     try {
       const { data } = await authClient.signOut();
-
       if (data?.success) {
         setSession(null);
         router.push('/signIn');
+        router.refresh();
       }
     } catch (error: any) {
       console.error('Logout failed', error.message);
