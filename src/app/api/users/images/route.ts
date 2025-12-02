@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { desc, eq, and, lt } from 'drizzle-orm';
+import { desc, eq, and, lt, count } from 'drizzle-orm';
 import { db } from '@/drizzle/db';
 import { request } from '@/drizzle/schema';
 import { checkUserSession } from '@/utils/server/checkUserSession';
@@ -12,8 +12,15 @@ export const GET = async (req: NextRequest) => {
     const limitParam = Number(params.get('limit'));
     const cursorParam = params.get('cursor');
 
-    const limit = limitParam >= 0 ? Math.min(limitParam, 20) : 5;
+    const limit = limitParam > 0 ? Math.min(limitParam, 20) : 5;
     const cursor = cursorParam ? new Date(cursorParam) : undefined;
+
+    const [totalRequest] = await db
+      .select({
+        total: count(),
+      })
+      .from(request)
+      .where(eq(request.userId, userId));
 
     const where = cursor
       ? and(eq(request.userId, userId), lt(request.createdAt, cursor))
@@ -39,7 +46,7 @@ export const GET = async (req: NextRequest) => {
           },
         },
       },
-      limit: limit,
+      limit: limit + 1,
     });
 
     if (!response || response.length === 0) {
@@ -49,7 +56,7 @@ export const GET = async (req: NextRequest) => {
           message: 'No image found',
           data: [],
           meta: {
-            total: 0,
+            total: totalRequest.total,
             limit: limit,
             nextCursor: null,
           },
@@ -58,10 +65,11 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    const nextCursor =
-      response.length > 0
-        ? response[response.length - 1].createdAt.toISOString()
-        : null;
+    let nextCursor = null;
+    if (response.length > limit) {
+      const nextItem = response.pop();
+      nextCursor = nextItem?.createdAt.toISOString();
+    }
 
     const parsedData = response.map((item) => {
       return {
@@ -84,7 +92,7 @@ export const GET = async (req: NextRequest) => {
         message: 'Images retrieved successfully',
         data: parsedData,
         meta: {
-          total: response.length,
+          total: totalRequest.total,
           limit: Number(limit),
           nextCursor: nextCursor,
         },

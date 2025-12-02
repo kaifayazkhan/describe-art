@@ -4,7 +4,7 @@ import { GalleryImages, ImageResponseType } from '@/types/images';
 import { getImages } from '@/apiUtils/getImages';
 import ImageOutputPreview from '@/app/(protected)/_components/ImagePreviewGallery';
 import ImageCard from '@/app/(protected)/_components/ImageCard';
-import ImagePlaceholder from '@/app/(protected)/_components/ImagePlaceholder';
+import Spinner from '@/components/UI/Spinner';
 
 const LIMIT = 5;
 
@@ -104,18 +104,14 @@ function ImageGallery() {
         observer.unobserve(currentRef);
       }
     };
-  }, [hasNextPage, cursor]);
+  }, [hasNextPage, cursor, loading]);
 
   return (
     <div className='space-y-5 mt-4'>
-      {loading && (
-        <div>
-          <p className='text-gray-400'>Loading...</p>
-          <div className='grid grid-cols-3 gap-10 mt-3'>
-            <ImagePlaceholder />
-            <ImagePlaceholder />
-            <ImagePlaceholder />
-          </div>
+      {loading && images.length === 0 && (
+        <div className='w-full h-40  text-center gap-1 flex  justify-center items-center'>
+          <Spinner />
+          Loading...
         </div>
       )}
 
@@ -131,16 +127,17 @@ function ImageGallery() {
         </div>
       ))}
 
-      {hasNextPage && <div ref={scrollRef} className='w-full h-20'></div>}
+      {hasNextPage && <div ref={scrollRef} className='w-full h-10'></div>}
 
       {hasNextPage && loading && images.length > 0 ? (
-        <div className='w-full h-10 flex justify-center items-center'>
+        <div className='w-full h-10  text-center gap-1 flex  justify-center items-center'>
+          <Spinner />
           Loading...
         </div>
       ) : null}
 
       {!loading && !hasNextPage && images.length >= 0 ? (
-        <div className='w-full h-10 flex justify-center items-center'>
+        <div className='w-full h-40 flex justify-center items-center'>
           No more images found
         </div>
       ) : null}

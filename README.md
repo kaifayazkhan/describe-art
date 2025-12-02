@@ -12,46 +12,72 @@
 
 ## Project Description
 
-Text to Image generation platform that uses **Vision AI** to generate images from prompts. It uses Stable Diffusion XL model for generating high quality images.
+Describe Art is a text to image generation platform that uses Vision AI to create visuals from user prompts. High quality output comes from the Stable Diffusion XL model.
 
 ## Tech Stack
 
-Next.js, TailwindCSS, ContextAPI, TypeScript, Drizzle, PostgreSQL, AWS (S3 + Cloudfront), React-hook-form
+Next.js, TailwindCSS, ContextAPI, TypeScript, Drizzle, PostgreSQL, AWS (S3 + Cloudfront), React Hook Form
 
 ## Features
 
-- Create account (Email and Password, Google Sign In)
-- Generate images from prompt
-- Images are stored in S3 bucket and metadata into postgres database
+- User authentication with email, password, and Google Sign In
+- Create AI generated images with text prompts
+- All images are stored in AWS S3 with metadata saved in PostgreSQL
+- Personal gallery page where users can view all their generated images
+- Cursor based pagination with infinite scroll for a smooth browsing experience
+
+## Environment Variables
+
+Copy .env.example to .env and add your keys:
+
+```bash
+DATABASE_URL=""
+
+STABILITY_API_KEY=""
+
+RESEND_API_KEY=""
+RESEND_FROM_EMAIL=""
+
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+AWS_ACCESS_KEY=""
+AWS_SECRET_KEY=""
+AWS_S3_BUCKET_NAME=""
+AWS_REGION=""
+
+NEXT_PUBLIC_BASE_URL=""
+
+BETTER_AUTH_SECRET=""
+```
 
 ## Getting Started
 
-- Clone the repo
+- Clone the repo:
 
 ```bash
-  git clone https://github.com/kaifayazkhan/describeArt
+  git clone https://github.com/kaifayazkhan/describe-art
 ```
 
-- Navigate to the project directory
+- Navigate to the project directory:
 
 ```bash
-    cd describeArt
+    cd describe-art
 ```
 
-- Install the dependencies
+- Install the dependencies:
 
 ```bash
     npm i
 ```
 
-- Rename the .env.example to .env and put your actual keys
-- Build the app
+- Build the app:
 
 ```bash
     npm run build
 ```
 
-- Run the app
+- Run the app:
 
 ```bash
     npm run start
