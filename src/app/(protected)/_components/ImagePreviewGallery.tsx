@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { ArrowRightIcon, ArrowLeftIcon, X } from 'lucide-react';
-import { ImageResponse } from '@/types/images';
+import { ImageResponseType } from '@/types/images';
 import DownloadButton from '@/app/(protected)/_components/DownloadButton';
 
 const controlButtonStyle =
@@ -15,7 +15,7 @@ function ImageOutputPreview({
 }: {
   selectedImageId: number;
   closeModal: () => void;
-  images: ImageResponse[];
+  images: ImageResponseType[];
 }) {
   const [selectedImage, setSelectedImage] = useState<number>(selectedImageId);
 
@@ -34,7 +34,7 @@ function ImageOutputPreview({
   };
 
   return (
-    <div className='fixed inset-0 z-[100] flex justify-center items-center py-5 backdrop-blur-sm drop-shadow-2xl overflow-y-auto'>
+    <div className='fixed inset-0 z-50 flex justify-center items-center py-5 !border-0 backdrop-blur-sm drop-shadow-2xl overflow-y-auto'>
       <button
         className='absolute inset-0 '
         tabIndex={-1}
@@ -76,7 +76,14 @@ function ImageOutputPreview({
 export function OutputImageCard({ src, alt }: { src: string; alt: string }) {
   return (
     <div className='relative size-full overflow-hidden'>
-      <Image src={src} fill alt={alt} className='object-contain' sizes='60vw' />
+      <Image
+        src={src}
+        fill
+        alt={alt}
+        className='object-contain'
+        sizes='60vw'
+        loading='eager'
+      />
     </div>
   );
 }

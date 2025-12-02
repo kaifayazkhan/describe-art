@@ -6,18 +6,17 @@ export type Models = Pick<
   'id' | 'modelId' | 'provider' | 'displayName'
 >;
 
-export const getModels = async (): Promise<Models[] | undefined> => {
+export const getModels = async () => {
   try {
     const response = await api.get('/models');
 
-    if (response.status === 200) {
+    if (response.status === 200 && response?.data) {
       return response.data.data as Models[];
     }
 
-    console.error(`Failed to fetch models: ${response.status}`, response.data);
-    return [];
+    throw new Error('Unable to get models', { cause: response.statusText });
   } catch (error) {
     console.error('Error fetching models:', error);
-    return [];
+    throw error;
   }
 };
