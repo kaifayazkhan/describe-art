@@ -1,14 +1,15 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import CTAButton from '../UI/CTAButton';
 import { headerData } from '@/constants/data';
 import Hamburger from './Hamburger';
 import { cn } from '@/utils/tailwind-merge';
 import { authClient } from '@/utils/auth-client';
 import { Session } from '@/utils/auth';
-import { useEffect, useState } from 'react';
 
 export default function Header({ padding }: { padding?: string }) {
   const pathname = usePathname();
@@ -17,16 +18,15 @@ export default function Header({ padding }: { padding?: string }) {
 
   const handleLogout = async () => {
     try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            setSession(null);
-            router.push('/signIn');
-          },
-        },
-      });
+      const { data } = await authClient.signOut();
+
+      if (data?.success) {
+        setSession(null);
+        router.push('/signIn');
+      }
     } catch (error: any) {
-      throw new Error('Logout failed', error.message);
+      console.error('Logout failed', error.message);
+      toast.error('Failed to logout');
     }
   };
 
@@ -48,7 +48,13 @@ export default function Header({ padding }: { padding?: string }) {
     >
       <div className='h-20 flex-Row-between'>
         <Link href='/' className='flex-center h-full gap-1'>
-          <Image src='/assets/logo-1.webp' width={50} height={100} alt='Logo' />
+          <Image
+            src='/assets/logo-1.webp'
+            width={50}
+            height={100}
+            alt='Logo'
+            fetchPriority='high'
+          />
           <span className='text-xl font-semibold hidden sm:block'>
             Describe Art
           </span>
@@ -65,17 +71,31 @@ export default function Header({ padding }: { padding?: string }) {
                 <Link href={link}>{title}</Link>
               </li>
             ))}
-            <li>
-              {session ? (
-                <CTAButton onClick={handleLogout} className='rounded-3xl px-5'>
-                  Logout
-                </CTAButton>
-              ) : (
+            {session ? (
+              <>
+                <li
+                  className={`hover:text-primaryCTA ${
+                    pathname == '/gallery' ? 'text-primaryCTA' : ''
+                  }  transition-all duration-200 flex items-center gap-2 cursor-pointer relative`}
+                >
+                  <Link href='/gallery'>Gallery</Link>
+                </li>
+                <li>
+                  <CTAButton
+                    onClick={handleLogout}
+                    className='rounded-3xl px-5'
+                  >
+                    Logout
+                  </CTAButton>
+                </li>
+              </>
+            ) : (
+              <li>
                 <CTAButton className='rounded-3xl px-5' asChild>
                   <Link href={'/signIn'}>Login</Link>
                 </CTAButton>
-              )}
-            </li>
+              </li>
+            )}
           </ul>
         </nav>
 
