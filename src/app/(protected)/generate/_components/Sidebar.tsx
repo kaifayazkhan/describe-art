@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -13,14 +14,15 @@ import {
 } from '@/utils/FormSchema';
 import RHFSelect, { SelectOptions } from './RHFSelect';
 import { aspectRatio } from '@/utils/imageDimension';
-import { type Models } from '@/apiUtils/models';
+import { getModels, type Models } from '@/apiUtils/models';
 
 const imageDimensions: SelectOptions[] = aspectRatio.map((item) => {
   return { label: item, value: item };
 });
 
-export default function GenerateSidebar({ models }: { models: Models[] }) {
+export default function GenerateSidebar() {
   const { setImageDesc, setIsLoading, setImages } = useGenerateImage();
+  const [models, setModels] = useState<Models[]>([]);
 
   const parsedModels: SelectOptions[] = models.map((item) => {
     return {
@@ -65,6 +67,17 @@ export default function GenerateSidebar({ models }: { models: Models[] }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getModels();
+        setModels(data);
+      } catch (e) {
+        console.error('Failed to fetch models', e);
+      }
+    })();
+  }, []);
 
   return (
     <form
