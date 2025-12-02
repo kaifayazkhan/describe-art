@@ -108,7 +108,7 @@ function ImageGallery() {
 
   return (
     <div className='space-y-5 mt-4'>
-      {loading && (
+      {loading && images.length === 0 && (
         <div className='w-full h-40  text-center gap-1 flex  justify-center items-center'>
           <Spinner />
           Loading...
@@ -129,7 +129,7 @@ function ImageGallery() {
 
       {hasNextPage && <div ref={scrollRef} className='w-full h-10'></div>}
 
-      {hasNextPage && loading && images.length >= 0 ? (
+      {hasNextPage && loading && images.length > 0 ? (
         <div className='w-full h-10  text-center gap-1 flex  justify-center items-center'>
           <Spinner />
           Loading...
