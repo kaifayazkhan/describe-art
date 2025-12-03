@@ -4,7 +4,7 @@ import { ModelType } from '@/drizzle/schema';
 export type Models = Pick<
   ModelType,
   'id' | 'modelId' | 'provider' | 'displayName'
->;
+> & { supportedDimensions: string[] };
 
 export const getModels = async () => {
   try {

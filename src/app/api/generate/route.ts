@@ -2,17 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import {
   GenerateImageSchema,
-  generateWithStableDiffusion,
+  GenerateImage,
 } from '@/utils/server/generateImage';
 import { db } from '@/drizzle/db';
 import { model, request, image as requestImage } from '@/drizzle/schema';
 import { checkUserSession } from '@/utils/server/checkUserSession';
 import { uploadObject } from '@/utils/s3';
+import { MODEL_CONFIG, ModelKeyType } from '@/utils/server/modelConfig';
+import { AspectRatioTypeFlux, AspectRatioTypeSD } from '@/utils/imageDimension';
 
 export const POST = async (req: NextRequest) => {
-  try {
-    const userId = await checkUserSession(req);
+  const userId = await checkUserSession(req);
 
+  if (!userId) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Unauthorized',
+        data: null,
+      },
+      { status: 401 },
+    );
+  }
+  try {
     const requestBody = await req.json();
 
     const { success, data, error } = GenerateImageSchema.safeParse(requestBody);
@@ -40,19 +52,42 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    const config = MODEL_CONFIG[imageModel.model as ModelKeyType];
+
+    if (!config) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Unsupported model',
+        },
+        { status: 400 },
+      );
+    }
+
+    if (data.imageCount > config.maxImages) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `This model only supports up to ${config.maxImages} image`,
+        },
+        { status: 400 },
+      );
+    }
+
     // Generate image
+    const Generate = new GenerateImage(
+      data.prompt,
+      data.imageCount,
+      data.aspectRatio as AspectRatioTypeSD | AspectRatioTypeFlux,
+    );
+
     let response;
-    switch (imageModel.model) {
-      case 'stable-diffusion-xl-1024-v1-0':
-        response = await generateWithStableDiffusion({
-          prompt: data?.prompt,
-          imageCount: data?.imageCount,
-          aspectRatio: data?.aspectRatio,
-        });
+    switch (config.type) {
+      case 'sd':
+        response = await Generate.StableDiffusion(config.steps);
         break;
-      case 'black-forest-labs/flux-schnell':
-        break;
-      case 'black-forest-labs/flux-dev':
+      case 'flux':
+        response = await Generate.Flux(imageModel.model as Exclude<ModelKeyType, "stable-diffusion-xl-1024-v1-0">, config.steps);
         break;
       default:
         throw new Error('No image model found');
@@ -143,12 +178,13 @@ export const POST = async (req: NextRequest) => {
       },
       { status: 201 },
     );
-  } catch (error: unknown) {
+  } catch (error: any) {
+    console.error('Error generating image:', error);
     return NextResponse.json(
       {
         success: false,
         message: 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? error : null,
+        error: process.env.NODE_ENV === 'development' ? error?.cause : null,
       },
       { status: 500 },
     );

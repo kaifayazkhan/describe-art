@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { aspectRatio } from '@/utils/imageDimension';
 
 const passwordSchema = z.string().min(8, {
   message: 'Password must be greater than or equal to 8 characters',
@@ -51,7 +50,9 @@ export const GenerateImageSchema = z.object({
     .min(4, { message: 'Prompt length must be greater than 4 characters' })
     .max(400, { message: 'Length cannot be greater than 400' }),
   imageCount: z.coerce.number().int().min(1).max(5),
-  aspectRatio: z.enum(aspectRatio),
+  aspectRatio: z
+    .string({ message: 'Select Aspect Ratio' })
+    .min(1, { message: 'Select Aspect Ratio' }),
   model: z.coerce
     .number({ message: 'Select Model' })
     .int({ message: 'Select Model' }),

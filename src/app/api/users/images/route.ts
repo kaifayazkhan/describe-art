@@ -6,9 +6,20 @@ import { checkUserSession } from '@/utils/server/checkUserSession';
 
 export const GET = async (req: NextRequest) => {
   const params = req.nextUrl.searchParams;
-  try {
-    const userId = await checkUserSession(req);
+  const userId = await checkUserSession(req);
 
+  if (!userId) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Unauthorized',
+        data: null,
+      },
+      { status: 401 },
+    );
+  }
+
+  try {
     const limitParam = Number(params.get('limit'));
     const cursorParam = params.get('cursor');
 
