@@ -21,7 +21,7 @@ export default function Header({ padding }: { padding?: string }) {
       const { data } = await authClient.signOut();
       if (data?.success) {
         setSession(null);
-        router.push('/signIn');
+        router.push('/sign-in');
         router.refresh();
       }
     } catch (error: any) {
@@ -92,7 +92,7 @@ export default function Header({ padding }: { padding?: string }) {
             ) : (
               <li>
                 <CTAButton className='rounded-3xl px-5' asChild>
-                  <Link href={'/signIn'}>Login</Link>
+                  <Link href={'/sign-in'}>Login</Link>
                 </CTAButton>
               </li>
             )}
@@ -107,7 +107,7 @@ export default function Header({ padding }: { padding?: string }) {
               </CTAButton>
             ) : (
               <CTAButton className='rounded-3xl px-5' asChild>
-                <Link href={'/signIn'}>Login</Link>
+                <Link href={'/sign-in'}>Login</Link>
               </CTAButton>
             )}
           </div>

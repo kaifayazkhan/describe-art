@@ -1,6 +1,6 @@
 import HeaderAndFooterLayout from '@/components/HeaderAndFooterLayout';
 import React from 'react';
-import ContactForm from './_components/contactForm';
+import ContactForm from './_components/ContactForm';
 
 export default function Contact() {
   return (

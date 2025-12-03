@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import ResetPasswordForm from './_components/resetPasswordForm';
+import ResetPasswordForm from './_components/ResetPasswordForm';
 import { Suspense } from 'react';
 import FormWrapper from '@/app/(auth)/_components/FormWrapper';
 
@@ -10,7 +10,7 @@ export default function ResetPassword() {
         <ResetPasswordForm />
       </Suspense>
       <div className='text-center'>
-        <Link href='/signIn' className='text-primaryCTA'>
+        <Link href='/sign-in' className='text-primaryCTA'>
           Back to login
         </Link>
       </div>
