@@ -56,7 +56,7 @@ export class GenerateImage {
   }
 
   async StableDiffusion(steps: number) {
-    if (!AspectRatioFlux.includes(this.aspectRatio as AspectRatioTypeFlux)) {
+    if (!AspectRatioSD.includes(this.aspectRatio as AspectRatioTypeSD)) {
       throw new Error(`Invalid aspect ratio for Flux: ${this.aspectRatio}`);
     }
     const { width, height } = getWidthAndHeightSD(

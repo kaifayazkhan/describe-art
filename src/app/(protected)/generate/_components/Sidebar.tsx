@@ -44,9 +44,9 @@ export default function GenerateSidebar() {
     models
       .find((item) => item.id === Number(selectedModel))
       ?.supportedDimensions?.map((ratio: string) => ({
-      label: ratio,
-      value: ratio,
-    })) ?? [];
+        label: ratio,
+        value: ratio,
+      })) ?? [];
 
   const onSubmit: SubmitHandler<GenerateImageSchemaType> = async (data) => {
     setIsLoading(true);

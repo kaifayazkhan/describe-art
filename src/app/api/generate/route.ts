@@ -87,7 +87,13 @@ export const POST = async (req: NextRequest) => {
         response = await Generate.StableDiffusion(config.steps);
         break;
       case 'flux':
-        response = await Generate.Flux(imageModel.model as Exclude<ModelKeyType, "stable-diffusion-xl-1024-v1-0">, config.steps);
+        response = await Generate.Flux(
+          imageModel.model as Exclude<
+            ModelKeyType,
+            'stable-diffusion-xl-1024-v1-0'
+          >,
+          config.steps,
+        );
         break;
       default:
         throw new Error('No image model found');
