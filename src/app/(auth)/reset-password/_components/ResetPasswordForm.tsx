@@ -40,7 +40,7 @@ export default function ResetPasswordForm() {
 
       if (res.data) {
         toast.success('Your password has been updated successfully.');
-        router.push('/signIn');
+        router.push('/sign-in');
         reset();
       }
     } catch (error) {
@@ -50,7 +50,7 @@ export default function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/signIn');
+      router.push('/sign-in');
     }
   }, []);
 

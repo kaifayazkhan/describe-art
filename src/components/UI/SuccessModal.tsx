@@ -36,7 +36,7 @@ export default function SuccessModal({
           </div>
           <div className='items-center px-4 py-3'>
             <Link
-              href={path ? path : '/signIn'}
+              href={path ? path : '/sign-in'}
               className='px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600'
             >
               {btnText ? btnText : 'Go Back to Login'}

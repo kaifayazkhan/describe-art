@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import FormWrapper from '../_components/FormWrapper';
-import SignUpForm from './_components/signUpForm';
+import FormWrapper from '../../_components/FormWrapper';
+import SignUpForm from './_components/SignUpForm';
 import SignInWithGoogle from '@/app/(auth)/_components/SignInWithGoogle';
 
 export default function SignUp() {
@@ -10,7 +10,7 @@ export default function SignUp() {
       <SignInWithGoogle title='Sign up with Google' />
       <div className='text-center mt-4'>
         Already have an account?{' '}
-        <Link href='/signIn' className='text-primaryCTA'>
+        <Link href='/sign-in' className='text-primaryCTA'>
           Login
         </Link>
       </div>
