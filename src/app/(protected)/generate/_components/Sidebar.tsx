@@ -13,16 +13,25 @@ import {
   GenerateImageSchemaType,
 } from '@/utils/FormSchema';
 import RHFSelect, { SelectOptions } from './RHFSelect';
-import { aspectRatio } from '@/utils/imageDimension';
 import { getModels, type Models } from '@/apiUtils/models';
-
-const imageDimensions: SelectOptions[] = aspectRatio.map((item) => {
-  return { label: item, value: item };
-});
 
 export default function GenerateSidebar() {
   const { setImageDesc, setIsLoading, setImages } = useGenerateImage();
   const [models, setModels] = useState<Models[]>([]);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isSubmitting, errors },
+  } = useForm<GenerateImageSchemaType>({
+    defaultValues: {},
+    resolver: zodResolver(GenerateImageSchema),
+  });
+
+  const selectedModel = watch('model');
 
   const parsedModels: SelectOptions[] = models.map((item) => {
     return {
@@ -31,20 +40,21 @@ export default function GenerateSidebar() {
     };
   });
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { isSubmitting, errors },
-  } = useForm<GenerateImageSchemaType>({
-    defaultValues: {
-      aspectRatio: '1:1',
-    },
-    resolver: zodResolver(GenerateImageSchema),
-  });
+  const filteredAspectRatios =
+    models
+      .find((item) => item.id === Number(selectedModel))
+      ?.supportedDimensions?.map((ratio: string) => ({
+        label: ratio,
+        value: ratio,
+      })) ?? [];
 
   const onSubmit: SubmitHandler<GenerateImageSchemaType> = async (data) => {
     setIsLoading(true);
+    setImages([]);
+    setImageDesc({
+      prompt: '',
+      imageCount: 0,
+    });
     try {
       setImageDesc({
         prompt: data.prompt,
@@ -62,7 +72,7 @@ export default function GenerateSidebar() {
         setImages(images);
       }
     } catch (e: any) {
-      toast.error('Failed to generate image');
+      toast.error(e?.cause || 'Failed to generate image');
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +88,10 @@ export default function GenerateSidebar() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    setValue('aspectRatio', '');
+  }, [selectedModel]);
 
   return (
     <form
@@ -116,7 +130,7 @@ export default function GenerateSidebar() {
         label='Aspect Ratio'
         placeholder='Select aspect ratio'
         name='aspectRatio'
-        options={imageDimensions}
+        options={filteredAspectRatios}
       />
 
       {/* Generate Button */}

@@ -21,7 +21,7 @@ Next.js, TailwindCSS, ContextAPI, TypeScript, Drizzle, PostgreSQL, AWS (S3 + Clo
 ## Features
 
 - User authentication with email, password, and Google Sign In
-- Create AI generated images with text prompts
+- Generate images using Stable Diffusion XL, Flux Schnell or Flux Dev
 - All images are stored in AWS S3 with metadata saved in PostgreSQL
 - Personal gallery page where users can view all their generated images
 - Cursor based pagination with infinite scroll for a smooth browsing experience
@@ -34,6 +34,7 @@ Copy .env.example to .env and add your keys:
 DATABASE_URL=""
 
 STABILITY_API_KEY=""
+NEBIUS_API_KEY=""
 
 RESEND_API_KEY=""
 RESEND_FROM_EMAIL=""

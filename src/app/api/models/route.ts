@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/drizzle/db';
 import { model } from '@/drizzle/schema';
 import { NextRequest, NextResponse } from 'next/server';
+import { modelAspectRatioSupport } from '@/utils/imageDimension';
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -26,11 +27,19 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
+    const data = response.map((item) => ({
+      ...item,
+      supportedDimensions:
+        modelAspectRatioSupport[
+          item.modelId as keyof typeof modelAspectRatioSupport
+        ] ?? [],
+    }));
+
     return NextResponse.json(
       {
         success: true,
         message: 'Models retrieved successfully',
-        data: response,
+        data: data,
       },
       { status: 200 },
     );

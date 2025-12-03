@@ -7,13 +7,13 @@ export const checkUserSession = async (req: NextRequest) => {
   });
 
   if (!session) {
-    throw new Error('Unauthorized - Session not found');
+    return null;
   }
 
   const userId = session.user.id;
 
   if (!userId) {
-    throw new Error('Unauthorized - User ID not found in session');
+    return null;
   }
 
   return userId;

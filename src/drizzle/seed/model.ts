@@ -11,13 +11,13 @@ const modelsData: ModelInsertType[] = [
   {
     displayName: 'Flux Schnell',
     modelId: 'black-forest-labs/flux-schnell',
-    isActive: false,
+    isActive: true,
     provider: 'Nebius',
   },
   {
     displayName: 'Flux Dev',
     modelId: 'black-forest-labs/flux-dev',
-    isActive: false,
+    isActive: true,
     provider: 'Nebius',
   },
 ];
