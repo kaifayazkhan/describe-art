@@ -40,6 +40,7 @@ export const auth = betterAuth({
       user: schema.user,
     },
   }),
+  trustedOrigins: [process.env.NEXT_PUBLIC_BASE_URL!],
   plugins: [nextCookies()],
 });
 
